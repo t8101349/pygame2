@@ -13,19 +13,92 @@ BACKGROUND_COLOR = "#000000"
 
 
 class Snake:
-    pass
+
+    def __init__(self):
+        self.body_size = BODY_PART
+        self.coordinates = []
+        self.squares = []
+
+        for i in range(0, BODY_PART):
+            self.coordinates.append([0, 0])
+
+        for x, y in self.coordinates:
+            square = canvas.create_rectangle(
+                x, y, x+SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
+            self.squares.append(square)
 
 
 class Food:
-    pass
+
+    def __init__(self):
+        x = random.randint(0, (GAME_WIDTH/SPACE_SIZE)-1)*SPACE_SIZE
+        y = random.randint(0, (GAME_HEIGHT/SPACE_SIZE)-1)*SPACE_SIZE
+
+        self.coordinates = [x, y]
+
+        canvas.create_oval(x, y, x+SPACE_SIZE, y+SPACE_SIZE,
+                           fill=FOOD_COLOR, tag="food")
 
 
-def next_turn():
-    pass
+def next_turn(snake, food):
+
+    x, y = snake.coordinates[0]
+
+    if direction == "up":
+        y -= SPACE_SIZE
+    elif direction == "down":
+        y += SPACE_SIZE
+    elif direction == "left":
+        x -= SPACE_SIZE
+    elif direction == "right":
+        x += SPACE_SIZE
+
+# insert
+    snake.coordinates.insert(0, [x, y])
+    square = canvas.create_rectangle(
+        x, y, x+SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
+    snake.squares.insert(0, square)
+
+# check_collistion apple
+    if x == food.coordinates[0] and y == food.coordinates[1]:
+
+        global score
+        score += 1
+        # label.config(text="Score:{}".format(score))
+        label.config(text=f"Score:{score}")
+
+        canvas.delete("food")
+        food = Food()
+
+
+# delete
+    else:
+        snake.coordinates.pop()
+        canvas.delete(snake.squares[-1])
+        snake.squares.pop()
+        # = del snake.squares[-1]
+
+
+# update
+    window.after(SPEED, next_turn, snake, food)
 
 
 def change_direction(new_direction):
-    pass
+
+    global direction
+
+    if new_direction == 'left':
+        if direction != 'right':
+            direction = new_direction
+    elif new_direction == 'right':
+        if direction != 'left':
+            direction = new_direction
+    elif new_direction == 'up':
+        if direction != 'down':
+            direction = new_direction
+    elif new_direction == 'down':
+        if direction != 'up':
+            direction = new_direction
 
 
 def check_collistion():
@@ -62,7 +135,14 @@ y = int(screen_height/2) - int(window_height/2)
 
 window.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
+window.bind('<Left>', lambda event: change_direction('left'))
+window.bind('<Right>', lambda event: change_direction('right'))
+window.bind('<Up>', lambda event: change_direction('up'))
+window.bind('<Down>', lambda event: change_direction('down'))
+
 snake = Snake()
 food = Food()
+
+next_turn(snake, food)
 
 window.mainloop()
