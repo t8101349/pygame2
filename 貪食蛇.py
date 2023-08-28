@@ -2,9 +2,9 @@ from tkinter import *
 import random
 
 
-GAME_WIDTH = 700
-GAME_HEIGHT = 700
-SPEED = 50
+GAME_WIDTH = 800
+GAME_HEIGHT = 800
+SPEED = 110
 SPACE_SIZE = 50
 BODY_PART = 3
 SNAKE_COLOR = "#00FF00"
@@ -59,16 +59,18 @@ def next_turn(snake, food):
         x, y, x+SPACE_SIZE, y + SPACE_SIZE, fill=SNAKE_COLOR, tag="snake")
     snake.squares.insert(0, square)
 
-# check_collistion apple
+# check_ apple
     if x == food.coordinates[0] and y == food.coordinates[1]:
 
-        global score
+        global score, SPEED
         score += 1
         # label.config(text="Score:{}".format(score))
         label.config(text=f"Score:{score}")
 
         canvas.delete("food")
         food = Food()
+
+        SPEED -= 10
 
 
 # delete
@@ -78,9 +80,14 @@ def next_turn(snake, food):
         snake.squares.pop()
         # = del snake.squares[-1]
 
+# gameover
+    if check_collistion(snake):
+        game_over()
+
 
 # update
-    window.after(SPEED, next_turn, snake, food)
+    else:
+        window.after(SPEED, next_turn, snake, food)
 
 
 def change_direction(new_direction):
@@ -101,12 +108,29 @@ def change_direction(new_direction):
             direction = new_direction
 
 
-def check_collistion():
-    pass
+def check_collistion(snake):
+
+    x, y = snake.coordinates[0]
+    if x < 0 or x >= GAME_WIDTH:
+        print('GAME OVER')
+        return True
+    if y < 0 or y >= GAME_HEIGHT:
+        print('GAME OVER')
+        return True
+
+    for body_part in snake.coordinates[1:]:
+        if x == body_part[0] and y == body_part[1]:
+            print("GAME OVER")
+            return True
+
+    return False
 
 
 def game_over():
-    pass
+
+    canvas.delete(ALL)
+    canvas.create_text(canvas.winfo_width()/2, canvas.winfo_height()/2,
+                       font=('consolas', 70), text="GAME OVER", fill='red', tag='gameover')
 
 
 window = Tk()
